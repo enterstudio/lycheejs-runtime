@@ -3,6 +3,13 @@
 NODE_DOWNLOAD="https://nodejs.org/dist/latest";
 RUNTIME_ROOT=$(cd "$(dirname "$0")/"; pwd);
 
+ALWAYS_YES="false";
+
+if [ "$1" == "--yes" ] || [ "$1" == "-y" ]; then
+	ALWAYS_YES="true";
+fi;
+
+
 
 _download_archive () {
 
@@ -20,7 +27,7 @@ _download_archive () {
 	fi;
 
 
-	if [ "$old_hash" != "$new_hash" ]; then
+	if [ "$ALWAYS_YES" == "true" ] || [ "$old_hash" != "$new_hash" ]; then
 
 		echo "> Downloading $download into '$target'";
 
@@ -51,7 +58,7 @@ _download_file () {
 	fi;
 
 
-	if [ "$old_hash" != "$new_hash" ]; then
+	if [ "$ALWAYS_YES" == "true" ] || [ "$old_hash" != "$new_hash" ]; then
 
 		echo "> Downloading $download into '$target'";
 
