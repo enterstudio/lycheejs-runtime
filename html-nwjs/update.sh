@@ -61,18 +61,16 @@ _download_linux () {
 				mkdir "$folder/locales";
 			fi;
 
-			mv $RUNTIME_ROOT/.tmp/nwjs-*/icudtl.dat                  $folder/icudtl.dat;
 			mv $RUNTIME_ROOT/.tmp/nwjs-*/lib/libffmpeg.so            $folder/lib/libffmpeg.so;
 			mv $RUNTIME_ROOT/.tmp/nwjs-*/lib/libnode.so              $folder/lib/libnode.so;
 			mv $RUNTIME_ROOT/.tmp/nwjs-*/lib/libnw.so                $folder/lib/libnw.so;
 			mv $RUNTIME_ROOT/.tmp/nwjs-*/locales/en-US.pak           $folder/locales/en-US.pak;
-			mv $RUNTIME_ROOT/.tmp/nwjs-*/resources.pak               $folder/resources.pak;
+			mv $RUNTIME_ROOT/.tmp/nwjs-*/icudtl.dat                  $folder/icudtl.dat;
+			mv $RUNTIME_ROOT/.tmp/nwjs-*/natives_blob.bin            $folder/natives_blob.bin;
 			mv $RUNTIME_ROOT/.tmp/nwjs-*/nw                          $folder/nw;
 			mv $RUNTIME_ROOT/.tmp/nwjs-*/nw_100_percent.pak          $folder/nw_100_percent.pak;
 			mv $RUNTIME_ROOT/.tmp/nwjs-*/nw_200_percent.pak          $folder/nw_200_percent.pak;
-			mv $RUNTIME_ROOT/.tmp/nwjs-*/nw_material_100_percent.pak $folder/nw_material_100_percent.pak;
-			mv $RUNTIME_ROOT/.tmp/nwjs-*/nw_material_200_percent.pak $folder/nw_material_200_percent.pak;
-			mv $RUNTIME_ROOT/.tmp/nwjs-*/natives_blob.bin            $folder/natives_blob.bin;
+			mv $RUNTIME_ROOT/.tmp/nwjs-*/resources.pak               $folder/resources.pak;
 			mv $RUNTIME_ROOT/.tmp/nwjs-*/snapshot_blob.bin           $folder/snapshot_blob.bin;
 
 			echo "$new_hash" > $folder/.download_hash;
@@ -175,22 +173,20 @@ _download_windows () {
 				mkdir "$folder/locales";
 			fi;
 
+			mv $RUNTIME_ROOT/.tmp/nwjs-*/locales/en-US.pak           $folder/locales/en-US.pak;
 			mv $RUNTIME_ROOT/.tmp/nwjs-*/d3dcompiler_47.dll          $folder/d3dcompiler_47.dll;
 			mv $RUNTIME_ROOT/.tmp/nwjs-*/ffmpeg.dll                  $folder/ffmpeg.dll;
 			mv $RUNTIME_ROOT/.tmp/nwjs-*/icudtl.dat                  $folder/icudtl.dat;
 			mv $RUNTIME_ROOT/.tmp/nwjs-*/libEGL.dll                  $folder/libEGL.dll;
 			mv $RUNTIME_ROOT/.tmp/nwjs-*/libGLESv2.dll               $folder/libGLESv2.dll;
-			mv $RUNTIME_ROOT/.tmp/nwjs-*/locales/en-US.pak           $folder/locales/en-US.pak;
+			mv $RUNTIME_ROOT/.tmp/nwjs-*/natives_blob.bin            $folder/natives_blob.bin;
 			mv $RUNTIME_ROOT/.tmp/nwjs-*/node.dll                    $folder/node.dll;
 			mv $RUNTIME_ROOT/.tmp/nwjs-*/nw.dll                      $folder/nw.dll;
 			mv $RUNTIME_ROOT/.tmp/nwjs-*/nw.exe                      $folder/nw.exe;
 			mv $RUNTIME_ROOT/.tmp/nwjs-*/nw_100_percent.pak          $folder/nw_100_percent.pak;
 			mv $RUNTIME_ROOT/.tmp/nwjs-*/nw_200_percent.pak          $folder/nw_200_percent.pak;
 			mv $RUNTIME_ROOT/.tmp/nwjs-*/nw_elf.dll                  $folder/nw_elf.dll;
-			mv $RUNTIME_ROOT/.tmp/nwjs-*/nw_material_100_percent.pak $folder/nw_material_100_percent.pak;
-			mv $RUNTIME_ROOT/.tmp/nwjs-*/nw_material_200_percent.pak $folder/nw_material_200_percent.pak;
 			mv $RUNTIME_ROOT/.tmp/nwjs-*/resources.pak               $folder/resources.pak;
-			mv $RUNTIME_ROOT/.tmp/nwjs-*/natives_blob.bin            $folder/natives_blob.bin;
 			mv $RUNTIME_ROOT/.tmp/nwjs-*/snapshot_blob.bin           $folder/snapshot_blob.bin;
 
 			echo "$new_hash" > $folder/.download_hash;
