@@ -7,7 +7,7 @@
 # NWJS_DOWNLOAD="http://nwjs.s3-us-west-2.amazonaws.com";
 
 NWJS_VERSION="v0.21.5";
-NWJS_DOWNLOAD="http://nwjs2.s3-us-west-2.amazonaws.com";
+NWJS_DOWNLOAD="http://nwjs2.s3.amazonaws.com";
 NWJS_AWSXML="$NWJS_DOWNLOAD/?delimiter=/&prefix=$NWJS_VERSION%2F";
 RUNTIME_ROOT=$(cd "$(dirname "$0")/"; pwd);
 
