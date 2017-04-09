@@ -13,10 +13,14 @@ PROJECT_NAME="$2";
 PROJECT_ROOT="$LYCHEEJS_ROOT$1";
 PROJECT_SIZE=`du -b -s $PROJECT_ROOT | cut -f 1`;
 BUILD_ID=`basename $PROJECT_ROOT`;
+SDK_DIR="";
 
 
+ANDROID_AVAILABLE=0;
 ANDROID_STATUS=1;
+FIREFOXOS_AVAILABLE=0;
 FIREFOXOS_STATUS=1;
+UBUNTU_AVAILABLE=0;
 UBUNTU_STATUS=1;
 
 
@@ -35,22 +39,19 @@ fi;
 
 if [ "$OS" == "darwin" ]; then
 
-	if [ "$ARCH" == "arm" -o "$ARCH" == "x86" ]; then
-		exit 1;
-	fi;
-
-
 	OS="osx";
-	SDK_DIR="$RUNTIME_ROOT/android-toolchain/sdk-osx/$ARCH";
+
+	if [ "$ARCH" == "x86_64" ]; then
+		SDK_DIR="$RUNTIME_ROOT/android-toolchain/sdk-osx/$ARCH";
+	fi;
 
 elif [ "$OS" == "linux" ]; then
 
-	if [ "$ARCH" == "x86" ]; then
-		exit 1;
-	fi;
-
 	OS="linux";
-	SDK_DIR="$RUNTIME_ROOT/android-toolchain/sdk-linux/$ARCH";
+
+	if [ "$ARCH" == "arm" ] || [ "$ARCH" == "x86_64" ]; then
+		SDK_DIR="$RUNTIME_ROOT/android-toolchain/sdk-linux/$ARCH";
+	fi;
 
 fi;
 
@@ -64,51 +65,63 @@ _package_android () {
 
 	mkdir "$BUILD_ID-android";
 
-	cp -R "$RUNTIME_ROOT/android/app" "$BUILD_ID-android/app";
-	cp "$RUNTIME_ROOT/android/gradle.properties" "$BUILD_ID-android/gradle.properties";
-	cp "$RUNTIME_ROOT/android/build.gradle" "$BUILD_ID-android/build.gradle";
-	cp "$RUNTIME_ROOT/android/settings.gradle" "$BUILD_ID-android/settings.gradle";
 
-# TODO: Resize icon.png to mipmap-...dpi/ic_launcher.png variants
+	if [ -d "$SDK_DIR" ] && [ -d "$RUNTIME_ROOT/android" ] && [ -d "$RUNTIME_ROOT/android-toolchain" ]; then
 
-	cp "$PROJECT_ROOT/core.js" "$BUILD_ID-android/app/src/main/assets/core.js";
-	cp "$PROJECT_ROOT/icon.png" "$BUILD_ID-android/app/src/main/assets/icon.png";
-	cp "$PROJECT_ROOT/index.html" "$BUILD_ID-android/app/src/main/assets/index.html";
+		ANDROID_AVAILABLE=1;
+
+		cp -R "$RUNTIME_ROOT/android/app" "$BUILD_ID-android/app";
+		cp "$RUNTIME_ROOT/android/gradle.properties" "$BUILD_ID-android/gradle.properties";
+		cp "$RUNTIME_ROOT/android/build.gradle" "$BUILD_ID-android/build.gradle";
+		cp "$RUNTIME_ROOT/android/settings.gradle" "$BUILD_ID-android/settings.gradle";
+
+		# TODO: Resize icon.png to mipmap-...dpi/ic_launcher.png variants
+
+		cp "$PROJECT_ROOT/core.js" "$BUILD_ID-android/app/src/main/assets/core.js";
+		cp "$PROJECT_ROOT/icon.png" "$BUILD_ID-android/app/src/main/assets/icon.png";
+		cp "$PROJECT_ROOT/index.html" "$BUILD_ID-android/app/src/main/assets/index.html";
 
 
-	echo -e "sdk.dir=$SDK_DIR" > "$BUILD_ID-android/local.properties";
+		echo -e "sdk.dir=$SDK_DIR" > "$BUILD_ID-android/local.properties";
 
 
-	# Well, fuck you, Apple.
-	if [ "$OS" == "osx" ]; then
-		sed -i '' "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-android/app/app.iml";
-		sed -i '' "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-android/app/src/main/res/values/strings.xml";
-	else
-		sed -i "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-android/app/app.iml";
-		sed -i "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-android/app/src/main/res/values/strings.xml";
+		# Well, fuck you, Apple.
+		if [ "$OS" == "osx" ]; then
+			sed -i '' "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-android/app/app.iml";
+			sed -i '' "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-android/app/src/main/res/values/strings.xml";
+		else
+			sed -i "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-android/app/app.iml";
+			sed -i "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-android/app/src/main/res/values/strings.xml";
+		fi;
+
+
+		"$RUNTIME_ROOT/android-toolchain/gradle/bin/gradle" "$BUILD_ID-android";
+		ANDROID_STATUS=$?;
+
+
+		if [ -d "$BUILD_ID-android/app/build/outputs/apk" ]; then
+
+			cp "$BUILD_ID-android/app/build/outputs/apk/app-debug.apk" "$BUILD_ID-android/app-debug.apk";
+			cp "$BUILD_ID-android/app/build/outputs/apk/app-debug-unaligned.apk" "$BUILD_ID-android/app-debug-unaligned.apk";
+			cp "$BUILD_ID-android/app/build/outputs/apk/app-release-unsigned.apk" "$BUILD_ID-android/app-release-unsigned.apk";
+
+		fi;
+
+
+		rm -rf "$BUILD_ID-android/app";
+		rm -rf "$BUILD_ID-android/build";
+
+		rm "$BUILD_ID-android/build.gradle";
+		rm "$BUILD_ID-android/settings.gradle";
+		rm "$BUILD_ID-android/gradle.properties";
+		rm "$BUILD_ID-android/local.properties";
+
 	fi;
 
 
-	"$RUNTIME_ROOT/android-toolchain/gradle/bin/gradle" "$BUILD_ID-android";
-	ANDROID_STATUS=$?;
-
-
-	if [ -d "$BUILD_ID-android/app/build/outputs/apk" ]; then
-
-		cp "$BUILD_ID-android/app/build/outputs/apk/app-debug.apk" "$BUILD_ID-android/app-debug.apk";
-		cp "$BUILD_ID-android/app/build/outputs/apk/app-debug-unaligned.apk" "$BUILD_ID-android/app-debug-unaligned.apk";
-		cp "$BUILD_ID-android/app/build/outputs/apk/app-release-unsigned.apk" "$BUILD_ID-android/app-release-unsigned.apk";
-
+	if [ "$ANDROID_AVAILABLE" == "0" ]; then
+		ANDROID_STATUS=0;
 	fi;
-
-
-	rm -rf "$BUILD_ID-android/app";
-	rm -rf "$BUILD_ID-android/build";
-
-	rm "$BUILD_ID-android/build.gradle";
-	rm "$BUILD_ID-android/settings.gradle";
-	rm "$BUILD_ID-android/gradle.properties";
-	rm "$BUILD_ID-android/local.properties";
 
 }
 
@@ -120,30 +133,38 @@ _package_firefoxos () {
 
 	mkdir "$BUILD_ID-firefoxos";
 
-	cp -R "$RUNTIME_ROOT/firefoxos/app" "$BUILD_ID-firefoxos/app";
 
+	if [ -d "$RUNTIME_ROOT/firefoxos" ]; then
 
-	cp "$PROJECT_ROOT/core.js" "$BUILD_ID-firefoxos/app/core.js";
-	cp "$PROJECT_ROOT/icon.png" "$BUILD_ID-firefoxos/app/icon.png";
-	cp "$PROJECT_ROOT/index.html" "$BUILD_ID-firefoxos/app/index.html";
+		FIREFOXOS_AVAILABLE=1;
 
+		cp -R "$RUNTIME_ROOT/firefoxos/app" "$BUILD_ID-firefoxos/app";
 
-	# Well, fuck you, Apple.
-	if [ "$OS" == "osx" ]; then
-		sed -i '' "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-firefoxos/app/manifest.webapp";
-		sed -i '' "s/__SIZE__/$PROJECT_SIZE/g" "$BUILD_ID-firefoxos/app/manifest.webapp";
-	else
-		sed -i "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-firefoxos/app/manifest.webapp";
-		sed -i "s/__SIZE__/$PROJECT_SIZE/g" "$BUILD_ID-firefoxos/app/manifest.webapp";
+		cp "$PROJECT_ROOT/core.js" "$BUILD_ID-firefoxos/app/core.js";
+		cp "$PROJECT_ROOT/icon.png" "$BUILD_ID-firefoxos/app/icon.png";
+		cp "$PROJECT_ROOT/index.html" "$BUILD_ID-firefoxos/app/index.html";
+
+		# Well, fuck you, Apple.
+		if [ "$OS" == "osx" ]; then
+			sed -i '' "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-firefoxos/app/manifest.webapp";
+			sed -i '' "s/__SIZE__/$PROJECT_SIZE/g" "$BUILD_ID-firefoxos/app/manifest.webapp";
+		else
+			sed -i "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-firefoxos/app/manifest.webapp";
+			sed -i "s/__SIZE__/$PROJECT_SIZE/g" "$BUILD_ID-firefoxos/app/manifest.webapp";
+		fi;
+
+		cd "$BUILD_ID-firefoxos/app";
+		zip -r -q "../app.zip" ./*;
+		FIREFOXOS_STATUS=$?;
+
+		rm -rf "$BUILD_ID-firefoxos/app";
+
 	fi;
 
 
-	cd "$BUILD_ID-firefoxos/app";
-	zip -r -q "../app.zip" ./*;
-	FIREFOXOS_STATUS=$?;
-
-
-	rm -rf "$BUILD_ID-firefoxos/app";
+	if [ "$FIREFOXOS_AVAILABLE" == "0" ]; then
+		FIREFOXOS_STATUS=0;
+	fi;
 
 }
 
@@ -155,60 +176,68 @@ _package_ubuntu () {
 
 	mkdir "$BUILD_ID-ubuntu";
 
-	cp -R "$RUNTIME_ROOT/ubuntu/DEBIAN" "$BUILD_ID-ubuntu/DEBIAN";
-	cp -R "$RUNTIME_ROOT/ubuntu/root" "$BUILD_ID-ubuntu/root";
 
+	if [ -d "$RUNTIME_ROOT/ubuntu" ]; then
 
-	cp "$PROJECT_ROOT/core.js" "$BUILD_ID-ubuntu/root/usr/share/__NAME__/core.js";
-	cp "$PROJECT_ROOT/icon.png" "$BUILD_ID-ubuntu/root/usr/share/__NAME__/icon.png";
-	cp "$PROJECT_ROOT/index.html" "$BUILD_ID-ubuntu/root/usr/share/__NAME__/index.html";
+		UBUNTU_AVAILABLE=1;
 
-	mv "$BUILD_ID-ubuntu/root/usr/bin/__NAME__" "$BUILD_ID-ubuntu/root/usr/bin/$PROJECT_NAME";
-	mv "$BUILD_ID-ubuntu/root/usr/share/__NAME__" "$BUILD_ID-ubuntu/root/usr/share/$PROJECT_NAME";
-	mv "$BUILD_ID-ubuntu/root/usr/share/applications/__NAME__.desktop" "$BUILD_ID-ubuntu/root/usr/share/applications/$PROJECT_NAME.desktop";
+		cp -R "$RUNTIME_ROOT/ubuntu/DEBIAN" "$BUILD_ID-ubuntu/DEBIAN";
+		cp -R "$RUNTIME_ROOT/ubuntu/root" "$BUILD_ID-ubuntu/root";
 
+		cp "$PROJECT_ROOT/core.js" "$BUILD_ID-ubuntu/root/usr/share/__NAME__/core.js";
+		cp "$PROJECT_ROOT/icon.png" "$BUILD_ID-ubuntu/root/usr/share/__NAME__/icon.png";
+		cp "$PROJECT_ROOT/index.html" "$BUILD_ID-ubuntu/root/usr/share/__NAME__/index.html";
 
-	# Well, fuck you, Apple.
-	if [ "$OS" == "osx" ]; then
-		sed -i '' "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-ubuntu/root/usr/bin/$PROJECT_NAME";
-		sed -i '' "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-ubuntu/root/usr/share/applications/$PROJECT_NAME.desktop";
-		sed -i '' "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-ubuntu/root/usr/share/$PROJECT_NAME/apparmor.json";
-	else
-		sed -i "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-ubuntu/root/usr/bin/$PROJECT_NAME";
-		sed -i "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-ubuntu/root/usr/share/applications/$PROJECT_NAME.desktop";
-		sed -i "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-ubuntu/root/usr/share/$PROJECT_NAME/apparmor.json";
+		mv "$BUILD_ID-ubuntu/root/usr/bin/__NAME__" "$BUILD_ID-ubuntu/root/usr/bin/$PROJECT_NAME";
+		mv "$BUILD_ID-ubuntu/root/usr/share/__NAME__" "$BUILD_ID-ubuntu/root/usr/share/$PROJECT_NAME";
+		mv "$BUILD_ID-ubuntu/root/usr/share/applications/__NAME__.desktop" "$BUILD_ID-ubuntu/root/usr/share/applications/$PROJECT_NAME.desktop";
+
+		# Well, fuck you, Apple.
+		if [ "$OS" == "osx" ]; then
+			sed -i '' "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-ubuntu/root/usr/bin/$PROJECT_NAME";
+			sed -i '' "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-ubuntu/root/usr/share/applications/$PROJECT_NAME.desktop";
+			sed -i '' "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-ubuntu/root/usr/share/$PROJECT_NAME/apparmor.json";
+		else
+			sed -i "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-ubuntu/root/usr/bin/$PROJECT_NAME";
+			sed -i "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-ubuntu/root/usr/share/applications/$PROJECT_NAME.desktop";
+			sed -i "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-ubuntu/root/usr/share/$PROJECT_NAME/apparmor.json";
+		fi;
+
+		cd "$PROJECT_ROOT/../$BUILD_ID-ubuntu/root";
+		tar czf $PROJECT_ROOT/../$BUILD_ID-ubuntu/data.tar.gz *;
+
+		let SIZE=`du -s $PROJECT_ROOT/../$BUILD_ID-ubuntu/root | sed s'/\s\+.*//'`+8
+
+		# Well, fuck you, Apple.
+		if [ "$OS" == "osx" ]; then
+			sed -i '' "s/__SIZE__/${SIZE}/g" "$PROJECT_ROOT/../$BUILD_ID-ubuntu/DEBIAN/control";
+			sed -i '' "s/__NAME__/${PROJECT_NAME}/g" "$PROJECT_ROOT/../$BUILD_ID-ubuntu/DEBIAN/control";
+		else
+			sed -i "s/__SIZE__/${SIZE}/g" "$PROJECT_ROOT/../$BUILD_ID-ubuntu/DEBIAN/control";
+			sed -i "s/__NAME__/${PROJECT_NAME}/g" "$PROJECT_ROOT/../$BUILD_ID-ubuntu/DEBIAN/control";
+		fi;
+
+		cd "$PROJECT_ROOT/../$BUILD_ID-ubuntu/DEBIAN";
+		tar czf $PROJECT_ROOT/../$BUILD_ID-ubuntu/control.tar.gz *;
+
+		cd "$PROJECT_ROOT/../$BUILD_ID-ubuntu";
+		echo 2.0 > ./debian-binary;
+		ar r "$PROJECT_ROOT/../$BUILD_ID-ubuntu/$PROJECT_NAME-1.0.0-all.deb" debian-binary control.tar.gz data.tar.gz &>/dev/null;
+		UBUNTU_STATUS=$?;
+
+		cd "$PROJECT_ROOT/../";
+		rm -rf "$BUILD_ID-ubuntu/DEBIAN";
+		rm -rf "$BUILD_ID-ubuntu/root";
+		rm "$BUILD_ID-ubuntu/data.tar.gz";
+		rm "$BUILD_ID-ubuntu/control.tar.gz";
+		rm "$BUILD_ID-ubuntu/debian-binary";
+
 	fi;
 
 
-	cd "$PROJECT_ROOT/../$BUILD_ID-ubuntu/root";
-	tar czf $PROJECT_ROOT/../$BUILD_ID-ubuntu/data.tar.gz *;
-
-	let SIZE=`du -s $PROJECT_ROOT/../$BUILD_ID-ubuntu/root | sed s'/\s\+.*//'`+8
-
-
-	# Well, fuck you, Apple.
-	if [ "$OS" == "osx" ]; then
-		sed -i '' "s/__SIZE__/${SIZE}/g" "$PROJECT_ROOT/../$BUILD_ID-ubuntu/DEBIAN/control";
-		sed -i '' "s/__NAME__/${PROJECT_NAME}/g" "$PROJECT_ROOT/../$BUILD_ID-ubuntu/DEBIAN/control";
-	else
-		sed -i "s/__SIZE__/${SIZE}/g" "$PROJECT_ROOT/../$BUILD_ID-ubuntu/DEBIAN/control";
-		sed -i "s/__NAME__/${PROJECT_NAME}/g" "$PROJECT_ROOT/../$BUILD_ID-ubuntu/DEBIAN/control";
+	if [ "$UBUNTU_AVAILABLE" == "0" ]; then
+		UBUNTU_STATUS=0;
 	fi;
-
-	cd "$PROJECT_ROOT/../$BUILD_ID-ubuntu/DEBIAN";
-	tar czf $PROJECT_ROOT/../$BUILD_ID-ubuntu/control.tar.gz *;
-
-	cd "$PROJECT_ROOT/../$BUILD_ID-ubuntu";
-	echo 2.0 > ./debian-binary;
-	ar r "$PROJECT_ROOT/../$BUILD_ID-ubuntu/$PROJECT_NAME-1.0.0-all.deb" debian-binary control.tar.gz data.tar.gz &>/dev/null;
-	UBUNTU_STATUS=$?;
-
-	cd "$PROJECT_ROOT/../";
-	rm -rf "$BUILD_ID-ubuntu/DEBIAN";
-	rm -rf "$BUILD_ID-ubuntu/root";
-	rm "$BUILD_ID-ubuntu/data.tar.gz";
-	rm "$BUILD_ID-ubuntu/control.tar.gz";
-	rm "$BUILD_ID-ubuntu/debian-binary";
 
 }
 

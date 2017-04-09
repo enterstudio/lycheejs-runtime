@@ -28,8 +28,11 @@ elif [ "$OS" == "windows_nt" ]; then
 fi;
 
 
+LINUX_AVAILABLE=0;
 LINUX_STATUS=1;
+OSX_AVAILABLE=0;
 OSX_STATUS=1;
+WINDOWS_AVAILABLE=0;
 WINDOWS_STATUS=1;
 
 
@@ -42,22 +45,36 @@ _package_linux () {
 	mkdir "$BUILD_ID-linux";
 
 
-	mkdir "$BUILD_ID-linux/x86";
-	cat "$RUNTIME_ROOT/linux/x86/nw" "$BUILD_ID.nw" > "$BUILD_ID-linux/x86/$PROJECT_NAME.bin";
-	chmod +x "$BUILD_ID-linux/x86/$PROJECT_NAME.bin";
+	if [ -d "$RUNTIME_ROOT/linux/x86" ]; then
 
-	cp -R $RUNTIME_ROOT/linux/x86/* $BUILD_ID-linux/x86/;
-	rm $BUILD_ID-linux/x86/nw;
+		LINUX_AVAILABLE=1;
+
+		mkdir "$BUILD_ID-linux/x86";
+		cat "$RUNTIME_ROOT/linux/x86/nw" "$BUILD_ID.nw" > "$BUILD_ID-linux/x86/$PROJECT_NAME.bin";
+		chmod +x "$BUILD_ID-linux/x86/$PROJECT_NAME.bin";
+
+		cp -R $RUNTIME_ROOT/linux/x86/* $BUILD_ID-linux/x86/;
+		rm $BUILD_ID-linux/x86/nw;
+
+	fi;
+
+	if [ -d "$RUNTIME_ROOT/linux/x86_64" ]; then
+
+		LINUX_AVAILABLE=1;
+
+		mkdir "$BUILD_ID-linux/x86_64";
+		cat "$RUNTIME_ROOT/linux/x86_64/nw" "$BUILD_ID.nw" > "$BUILD_ID-linux/x86_64/$PROJECT_NAME.bin";
+		chmod +x "$BUILD_ID-linux/x86_64/$PROJECT_NAME.bin";
+
+		cp -R $RUNTIME_ROOT/linux/x86_64/* $BUILD_ID-linux/x86_64/;
+		rm $BUILD_ID-linux/x86_64/nw;
+
+	fi;
 
 
-	mkdir "$BUILD_ID-linux/x86_64";
-	cat "$RUNTIME_ROOT/linux/x86_64/nw" "$BUILD_ID.nw" > "$BUILD_ID-linux/x86_64/$PROJECT_NAME.bin";
-	chmod +x "$BUILD_ID-linux/x86_64/$PROJECT_NAME.bin";
-
-	cp -R $RUNTIME_ROOT/linux/x86_64/* $BUILD_ID-linux/x86_64/;
-	rm $BUILD_ID-linux/x86_64/nw;
-
-	if [ -x "$BUILD_ID-linux/x86/$PROJECT_NAME.bin" ] && [ -x "$BUILD_ID-linux/x86_64/$PROJECT_NAME.bin" ]; then
+	if [ "$LINUX_AVAILABLE" == "0" ]; then
+		LINUX_STATUS=0;
+	elif [ -x "$BUILD_ID-linux/x86/$PROJECT_NAME.bin" ] || [ -x "$BUILD_ID-linux/x86_64/$PROJECT_NAME.bin" ]; then
 		LINUX_STATUS=0;
 	fi;
 
@@ -71,21 +88,30 @@ _package_osx () {
 
 	mkdir "$BUILD_ID-osx";
 
-	mkdir "$BUILD_ID-osx/x86_64";
-	mkdir "$BUILD_ID-osx/x86_64/$PROJECT_NAME.app";
-	cp -r "$RUNTIME_ROOT/osx/x86_64/nwjs.app/Contents" "$BUILD_ID-osx/x86_64/$PROJECT_NAME.app/Contents";
-	cp "$BUILD_ID.nw" "$BUILD_ID-osx/x86_64/$PROJECT_NAME.app/Contents/Resources/app.nw";
 
-	# Well, fuck you, Apple.
-	if [ "$OS" == "osx" ]; then
-		sed -i '' "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-osx/x86_64/$PROJECT_NAME.app/Contents/Info.plist";
-	else
-		sed -i "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-osx/x86_64/$PROJECT_NAME.app/Contents/Info.plist";
-		png2icns "$BUILD_ID-osx/x86_64/$PROJECT_NAME.app/Contents/Resources/nw.icns" "$BUILD_ID/icon.png";
+	if [ -d "$RUNTIME_ROOT/osx/x86_64" ]; then
+
+		OSX_AVAILABLE=1;
+
+		mkdir "$BUILD_ID-osx/x86_64";
+		mkdir "$BUILD_ID-osx/x86_64/$PROJECT_NAME.app";
+		cp -r "$RUNTIME_ROOT/osx/x86_64/nwjs.app/Contents" "$BUILD_ID-osx/x86_64/$PROJECT_NAME.app/Contents";
+		cp "$BUILD_ID.nw" "$BUILD_ID-osx/x86_64/$PROJECT_NAME.app/Contents/Resources/app.nw";
+
+		# Well, fuck you, Apple.
+		if [ "$OS" == "osx" ]; then
+			sed -i '' "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-osx/x86_64/$PROJECT_NAME.app/Contents/Info.plist";
+		else
+			sed -i "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-osx/x86_64/$PROJECT_NAME.app/Contents/Info.plist";
+			png2icns "$BUILD_ID-osx/x86_64/$PROJECT_NAME.app/Contents/Resources/nw.icns" "$BUILD_ID/icon.png";
+		fi;
+
 	fi;
 
 
-	if [ -e "$BUILD_ID-osx/x86_64/$PROJECT_NAME.app/Contents/Resources/app.nw" ]; then
+	if [ "$OSX_AVAILABLE" == "0" ]; then
+		OSX_STATUS=0;
+	elif [ -e "$BUILD_ID-osx/x86_64/$PROJECT_NAME.app/Contents/Resources/app.nw" ]; then
 		OSX_STATUS=0;
 	fi;
 
@@ -99,23 +125,37 @@ _package_windows () {
 
 	mkdir "$BUILD_ID-windows";
 
-	mkdir "$BUILD_ID-windows/x86";
-	cat "$RUNTIME_ROOT/windows/x86/nw.exe" "$BUILD_ID.nw" > "$BUILD_ID-windows/x86/$PROJECT_NAME.exe";
-	chmod +x "$BUILD_ID-windows/x86/$PROJECT_NAME.exe";
 
-	cp -R $RUNTIME_ROOT/windows/x86/* $BUILD_ID-windows/x86/;
-	rm $BUILD_ID-windows/x86/nw.exe;
+	if [ -d "$RUNTIME_ROOT/windows/x86" ]; then
+
+		WINDOWS_AVAILABLE=1;
+
+		mkdir "$BUILD_ID-windows/x86";
+		cat "$RUNTIME_ROOT/windows/x86/nw.exe" "$BUILD_ID.nw" > "$BUILD_ID-windows/x86/$PROJECT_NAME.exe";
+		chmod +x "$BUILD_ID-windows/x86/$PROJECT_NAME.exe";
+
+		cp -R $RUNTIME_ROOT/windows/x86/* $BUILD_ID-windows/x86/;
+		rm $BUILD_ID-windows/x86/nw.exe;
+
+	fi;
+
+	if [ -d "$RUNTIME_ROOT/windows/x86_64" ]; then
+
+		WINDOWS_AVAILABLE=1;
+
+		mkdir "$BUILD_ID-windows/x86_64";
+		cat "$RUNTIME_ROOT/windows/x86_64/nw.exe" "$BUILD_ID.nw" > "$BUILD_ID-windows/x86_64/$PROJECT_NAME.exe";
+		chmod +x "$BUILD_ID-windows/x86_64/$PROJECT_NAME.exe";
+
+		cp -R $RUNTIME_ROOT/windows/x86_64/* $BUILD_ID-windows/x86_64/;
+		rm $BUILD_ID-windows/x86_64/nw.exe;
+
+	fi;
 
 
-	mkdir "$BUILD_ID-windows/x86_64";
-	cat "$RUNTIME_ROOT/windows/x86_64/nw.exe" "$BUILD_ID.nw" > "$BUILD_ID-windows/x86_64/$PROJECT_NAME.exe";
-	chmod +x "$BUILD_ID-windows/x86_64/$PROJECT_NAME.exe";
-
-	cp -R $RUNTIME_ROOT/windows/x86_64/* $BUILD_ID-windows/x86_64/;
-	rm $BUILD_ID-windows/x86_64/nw.exe;
-
-
-	if [ -x "$BUILD_ID-windows/x86/$PROJECT_NAME.exe" ] && [ -x "$BUILD_ID-windows/x86_64/$PROJECT_NAME.exe" ]; then
+	if [ "$WINDOWS_AVAILABLE" == "0" ]; then
+		WINDOWS_STATUS=0;
+	elif [ -x "$BUILD_ID-windows/x86/$PROJECT_NAME.exe" ] || [ -x "$BUILD_ID-windows/x86_64/$PROJECT_NAME.exe" ]; then
 		WINDOWS_STATUS=0;
 	fi;
 

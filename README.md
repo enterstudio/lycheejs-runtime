@@ -32,6 +32,16 @@ cd /opt/lycheejs/bin/runtime;
 ./bin/do-update.sh;
 ```
 
+The `do-update.sh` script also supports the `--yes` flag,
+which will cause a forced update that does not respect
+cached versions.
+
+```bash
+cd /opt/lycheejs/bin/runtime;
+
+# Force-Updates all runtimes
+./bin/do-update.sh --yes;
+```
 
 
 ## Releases

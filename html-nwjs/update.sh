@@ -3,10 +3,20 @@
 # XXX: NWJS guys have no symlink at /latest (it's outdated)
 # NWJS_DOWNLOAD="http://dl.nwjs.io/v0.15.1";
 
-NWJS_VERSION="v0.16.1";
-NWJS_DOWNLOAD="http://nwjs.s3-us-west-2.amazonaws.com";
+# XXX: Old versions (until 0.13) hosted on other server
+# NWJS_DOWNLOAD="http://nwjs.s3-us-west-2.amazonaws.com";
+
+NWJS_VERSION="v0.21.5";
+NWJS_DOWNLOAD="http://nwjs2.s3-us-west-2.amazonaws.com";
 NWJS_AWSXML="$NWJS_DOWNLOAD/?delimiter=/&prefix=$NWJS_VERSION%2F";
 RUNTIME_ROOT=$(cd "$(dirname "$0")/"; pwd);
+
+ALWAYS_YES="false";
+
+if [ "$1" == "--yes" ] || [ "$1" == "-y" ]; then
+	ALWAYS_YES="true";
+fi;
+
 
 
 _download_linux () {
@@ -28,7 +38,7 @@ _download_linux () {
 	fi;
 
 
-	if [ "$old_hash" != "$new_hash" ]; then
+	if [ "$ALWAYS_YES" == "true" ] || [ "$old_hash" != "$new_hash" ]; then
 
 		echo "> Downloading $download into '$folder'";
 
@@ -93,7 +103,7 @@ _download_osx () {
 	fi;
 
 
-	if [ "$old_hash" != "$new_hash" ]; then
+	if [ "$ALWAYS_YES" == "true" ] || [ "$old_hash" != "$new_hash" ]; then
 
 		echo "> Downloading $download into '$folder'";
 
@@ -146,7 +156,7 @@ _download_windows () {
 	fi;
 
 
-	if [ "$old_hash" != "$new_hash" ]; then
+	if [ "$ALWAYS_YES" == "true" ] || [ "$old_hash" != "$new_hash" ]; then
 
 		echo "> Downloading $download into '$folder'";
 
