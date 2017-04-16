@@ -39,15 +39,11 @@ fi;
 
 if [ "$OS" == "darwin" ]; then
 
-	OS="osx";
-
 	if [ "$ARCH" == "x86_64" ]; then
 		SDK_DIR="$RUNTIME_ROOT/android-toolchain/sdk-osx/$ARCH";
 	fi;
 
 elif [ "$OS" == "linux" ]; then
-
-	OS="linux";
 
 	if [ "$ARCH" == "arm" ] || [ "$ARCH" == "x86_64" ]; then
 		SDK_DIR="$RUNTIME_ROOT/android-toolchain/sdk-linux/$ARCH";
@@ -86,7 +82,7 @@ _package_android () {
 
 
 		# Well, fuck you, Apple.
-		if [ "$OS" == "osx" ]; then
+		if [ "$OS" == "darwin" ]; then
 			sed -i '' "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-android/app/app.iml";
 			sed -i '' "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-android/app/src/main/res/values/strings.xml";
 		else
@@ -145,7 +141,7 @@ _package_firefoxos () {
 		cp "$PROJECT_ROOT/index.html" "$BUILD_ID-firefoxos/app/index.html";
 
 		# Well, fuck you, Apple.
-		if [ "$OS" == "osx" ]; then
+		if [ "$OS" == "darwin" ]; then
 			sed -i '' "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-firefoxos/app/manifest.webapp";
 			sed -i '' "s/__SIZE__/$PROJECT_SIZE/g" "$BUILD_ID-firefoxos/app/manifest.webapp";
 		else
@@ -193,7 +189,7 @@ _package_ubuntu () {
 		mv "$BUILD_ID-ubuntu/root/usr/share/applications/__NAME__.desktop" "$BUILD_ID-ubuntu/root/usr/share/applications/$PROJECT_NAME.desktop";
 
 		# Well, fuck you, Apple.
-		if [ "$OS" == "osx" ]; then
+		if [ "$OS" == "darwin" ]; then
 			sed -i '' "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-ubuntu/root/usr/bin/$PROJECT_NAME";
 			sed -i '' "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-ubuntu/root/usr/share/applications/$PROJECT_NAME.desktop";
 			sed -i '' "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-ubuntu/root/usr/share/$PROJECT_NAME/apparmor.json";
@@ -209,7 +205,7 @@ _package_ubuntu () {
 		let SIZE=`du -s $PROJECT_ROOT/../$BUILD_ID-ubuntu/root | sed s'/\s\+.*//'`+8
 
 		# Well, fuck you, Apple.
-		if [ "$OS" == "osx" ]; then
+		if [ "$OS" == "darwin" ]; then
 			sed -i '' "s/__SIZE__/${SIZE}/g" "$PROJECT_ROOT/../$BUILD_ID-ubuntu/DEBIAN/control";
 			sed -i '' "s/__NAME__/${PROJECT_NAME}/g" "$PROJECT_ROOT/../$BUILD_ID-ubuntu/DEBIAN/control";
 		else

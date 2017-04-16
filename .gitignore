@@ -16,6 +16,11 @@
 
 /html-webview/.tmp
 
+/nidium/.tmp
+/nidium/downloads.html
+/nidium/linux/x86_64/nidium
+/nidium/osx/x86_64/nidium
+
 /node/.tmp
 /node/SHASUMS256.txt
 /node/linux/arm/node

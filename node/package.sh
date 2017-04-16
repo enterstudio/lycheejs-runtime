@@ -1,31 +1,10 @@
 #!/bin/bash
 
-lowercase() {
-	echo "$1" | sed "y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/";
-}
-
-OS=`lowercase \`uname\``;
-
 LYCHEEJS_ROOT=$(cd "$(dirname "$0")/../../../"; pwd);
 RUNTIME_ROOT=$(cd "$(dirname "$0")/"; pwd);
 PROJECT_NAME="$2";
 PROJECT_ROOT="$LYCHEEJS_ROOT$1";
 BUILD_ID=`basename $PROJECT_ROOT`;
-
-
-if [ "$OS" == "darwin" ]; then
-
-	OS="osx";
-
-elif [ "$OS" == "linux" ]; then
-
-	OS="linux";
-
-elif [ "$OS" == "windows_nt" ]; then
-
-	OS="windows";
-
-fi;
 
 
 LINUX_AVAILABLE=0;
@@ -34,6 +13,7 @@ OSX_AVAILABLE=0;
 OSX_STATUS=1;
 WINDOWS_AVAILABLE=0;
 WINDOWS_STATUS=1;
+
 
 
 _package_linux () {

@@ -19,6 +19,26 @@ This repository tries to ship binaries whereever possible.
 
 
 
+## Dependencies
+
+Minimal dependencies required to make the `update.sh`
+scripts work properly:
+
+```bash
+sudo pacman -S --needed bash curl git p7zip tar unzip;
+```
+
+Optional dependencies required to make the `package.sh`
+scripts work properly:
+
+```bash
+sudo pacman -S --needed binutils jdk8-openjdk;
+```
+
+Note: OpenJDK 8 is required for `html-webview` and its
+Android platform support.
+
+
 ## Usage
 
 The `do-update.sh` script allows to update all third-party

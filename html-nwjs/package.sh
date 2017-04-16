@@ -13,27 +13,13 @@ PROJECT_ROOT="$LYCHEEJS_ROOT$1";
 BUILD_ID=`basename $PROJECT_ROOT`;
 
 
-if [ "$OS" == "darwin" ]; then
-
-	OS="osx";
-
-elif [ "$OS" == "linux" ]; then
-
-	OS="linux";
-
-elif [ "$OS" == "windows_nt" ]; then
-
-	OS="windows";
-
-fi;
-
-
 LINUX_AVAILABLE=0;
 LINUX_STATUS=1;
 OSX_AVAILABLE=0;
 OSX_STATUS=1;
 WINDOWS_AVAILABLE=0;
 WINDOWS_STATUS=1;
+
 
 
 _package_linux () {
@@ -99,7 +85,7 @@ _package_osx () {
 		cp "$BUILD_ID.nw" "$BUILD_ID-osx/x86_64/$PROJECT_NAME.app/Contents/Resources/app.nw";
 
 		# Well, fuck you, Apple.
-		if [ "$OS" == "osx" ]; then
+		if [ "$OS" == "darwin" ]; then
 			sed -i '' "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-osx/x86_64/$PROJECT_NAME.app/Contents/Info.plist";
 		else
 			sed -i "s/__NAME__/$PROJECT_NAME/g" "$BUILD_ID-osx/x86_64/$PROJECT_NAME.app/Contents/Info.plist";

@@ -3,5 +3,5 @@
 PROJECT_ROOT=$(cd "$(dirname "$0")/"; pwd);
 
 cd $PROJECT_ROOT;
-./node ./index.js "$1" "$2" "$3" "$4" "$5";
+./nidium ./index.nml "$1" "$2" "$3" "$4" "$5";
 
