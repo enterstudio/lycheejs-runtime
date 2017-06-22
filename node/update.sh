@@ -122,7 +122,6 @@ _download_file "$FILE_WINDOWS_X64" "$HASH_WINDOWS_X64" "windows/x86_64/node.exe"
 rm -rf $RUNTIME_ROOT/.tmp;
 
 
-
 echo "SUCCESS";
 exit 0;
 
